@@ -1,12 +1,13 @@
 #!/bin/bash
 
-CONFIG_FILE="/etc/wpa_supplicant/wpa_supplicant.conf"
+FLAG_FILE="/etc/wifi_configured_flag"
 
-if [ -e "$CONFIG_FILE" ]; then
-  echo "WiFi configuration found. Starting in client mode."
+if [ -e "$FLAG_FILE" ]; then
+  echo "WiFi configuration completed. Exiting script."
   exit 0
 else
-  echo "No WiFi configuration found. Starting in AP mode."
-  exit 1
+  echo "WiFi configuration not completed. Starting hostapd."
+  systemctl start hostapd
+  echo "Starting Node.js application..."
+  sudo -u pi node /home/marco/dunebugger/app/app.js &
 fi
-
