@@ -9,5 +9,5 @@ else
   echo "WiFi configuration not completed. Starting hostapd."
   systemctl start hostapd
   echo "Starting Node.js application..."
-  sudo -u pi node /home/marco/dunebugger/app/app.js &
+  sudo -u pi node /home/marco/dunebugger-ap/app/app.js &
 fi
