@@ -28,8 +28,7 @@ channel=7
 macaddr_acl=0
 auth_algs=1
 ignore_broadcast_ssid=0
-wpa=2
-wpa_passphrase=YourSecurePassword   # Set a secure password
+wpa=0
 wpa_key_mgmt=WPA-PSK
 wpa_pairwise=TKIP
 rsn_pairwise=CCMP
@@ -105,6 +104,7 @@ After=network.target
 [Service]
 Type=forking
 PIDFile=/var/run/hostapd.pid
+ExecStartPre=/etc/hostapd/pre_hostapd.sh
 ExecStartPre=/sbin/iw dev wlan0 interface add ap0 type __ap
 ExecStartPre=/bin/sleep 2
 ExecStart=/usr/sbin/hostapd -B -P /var/run/hostapd.pid /etc/hostapd/hostapd.conf
