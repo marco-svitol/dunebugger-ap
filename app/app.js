@@ -21,15 +21,30 @@ app.get('/', (req, res) => {
         </head>
         <body>
           <h1>Dunebugger WiFi Configuration</h1>
-          <p>${isConnected ? `Connected to <strong>${ssid}</strong>` : 'Not Connected'}</p>
     `;
 
     // Include the form only if not connected
-    if (!isConnected) {
+    if (isConnected) {
       htmlContent += `
+          <p>Connected to <strong>${ssid}</strong></p>
+      `;
+    } else {
+      // Render the form with a dropdown for available SSIDs
+      htmlContent += `
+          <p>Not Connected</p>
           <form action="/configure" method="post">
-            <label for="ssid">SSID:</label>
-            <input type="text" id="ssid" name="ssid" required>
+            <label for="ssid">Select SSID:</label>
+            <select id="ssid" name="ssid" required>
+      `;
+
+      // Populate the dropdown with available SSIDs
+      availableSSIDs.forEach((availableSSID) => {
+        htmlContent += `<option value="${availableSSID}">${availableSSID}</option>`;
+      });
+
+      // Close the form
+      htmlContent += `
+            </select>
             <br>
             <label for="password">Password:</label>
             <input type="password" id="password" name="password" required>
@@ -70,6 +85,24 @@ app.post('/configure', (req, res) => {
     });
   });
 });
+
+// Function to get the list of available SSIDs
+function getAvailableSSIDs(callback) {
+  const listCommand = 'nmcli device wifi list';
+
+  exec(listCommand, (error, stdout, stderr) => {
+    if (error || stderr) {
+      console.error(`Error getting available SSIDs: ${error ? error.message : stderr}`);
+      callback([]);
+      return;
+    }
+
+    const lines = stdout.split('\n');
+    const ssids = lines.slice(1).map(line => line.split(/\s+/)[0]); // Assuming SSID is the first field
+
+    callback(ssids);
+  });
+}
 
 function setWifiConfiguration(ssid, password, callback) {
   const command = `nmcli device wifi connect "${ssid}" password "${password}"`;
