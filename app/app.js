@@ -102,7 +102,7 @@ function checkWifiConnectionStatus(callback) {
       const connectedSSID = connectedLine.split(/\s+/)[0]; // Assuming SSID is the first field
 
       //DEBUG
-      if (connectedSSID == "Soter333"){callback(false, null)} 
+      if (connectedSSID == "Soter333"){return callback(false, null)} 
 
       callback(true, connectedSSID);
     } else {
