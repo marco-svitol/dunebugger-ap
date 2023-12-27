@@ -99,10 +99,9 @@ function getAvailableSSIDs(callback) {
       return;
     }
 
-    
-    console.log(`getAvailableSSIDs ${stdout}`)
-    
     const lines = stdout.split('\n');
+    console.log(`getAvailableSSIDs SSIDs:\n${stdout}`)
+    console.log(`getAvailableSSIDs lines count:\n${lines.count}`)
     const ssids = [];
     let inUseSSID = null;
 
