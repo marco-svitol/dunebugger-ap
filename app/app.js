@@ -102,7 +102,6 @@ function getAvailableSSIDs(callback) {
 
     const lines = stdout.split('\n');
     console.log(`getAvailableSSIDs SSIDs:\n${stdout}`)
-    console.log(`getAvailableSSIDs lines count:\n${lines.count}`)
     const ssids = [];
     let inUseSSID = null;
 
@@ -110,7 +109,8 @@ function getAvailableSSIDs(callback) {
     lines.slice(1).forEach((line) => {
       const columns = line.trim().split(/\s+/);
       const ssid = columns[2];
-
+      
+      console.log(`getAvailableSSIDs columns0:${columns[0]} columns1:${columns[1]} columns2:${columns[2]}`)
       if (columns[0].includes('*')) {
         inUseSSID = ssid;
       }
