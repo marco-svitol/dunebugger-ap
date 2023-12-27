@@ -27,7 +27,10 @@ app.get('/', (req, res) => {
       if (isConnected) {
         htmlContent += `
             <p>Connected to <strong>${ssid}</strong></p>
+            </body>
+            </html>
         `;
+        res.send(htmlContent);
       } else {
         // Render the form with a dropdown for available SSIDs
         htmlContent += `
@@ -61,12 +64,6 @@ app.get('/', (req, res) => {
           res.send(htmlContent);
         })
       }
-      htmlContent += `
-          </body>
-        </html>
-      `;
-
-      res.send(htmlContent);
     });
 });
 
