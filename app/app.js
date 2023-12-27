@@ -11,8 +11,6 @@ app.use(bodyParser.urlencoded({ extended: true }));
 // Serve HTML configuration page
 app.get('/', (req, res) => {
   // Get the list of available SSIDs
-  getAvailableSSIDs((availableSSIDs) => {
-    // Check WiFi connection status
     checkWifiConnectionStatus((isConnected, ssid) => {
       // Render HTML with connection status
       let htmlContent = `
@@ -39,24 +37,26 @@ app.get('/', (req, res) => {
               <select id="ssid" name="ssid" required>
         `;
 
-        // Populate the dropdown with available SSIDs
-        availableSSIDs.forEach((availableSSID) => {
-          const isSelected = availableSSID === inUseSSID ? 'selected' : '';
-          htmlContent += `<option value="${availableSSID}" ${isSelected}>${availableSSID}</option>`;
-        });
+        getAvailableSSIDs((availableSSIDs, inUseSSID) => {
+          // Check WiFi connection status
+          // Populate the dropdown with available SSIDs
+          availableSSIDs.forEach((availableSSID) => {
+            const isSelected = availableSSID === inUseSSID ? 'selected' : '';
+            htmlContent += `<option value="${availableSSID}" ${isSelected}>${availableSSID}</option>`;
+          });
 
-        // Close the form
-        htmlContent += `
-              </select>
-              <br>
-              <label for="password">Password:</label>
-              <input type="password" id="password" name="password" required>
-              <br>
-              <button type="submit">Configure</button>
-            </form>
-        `;
+          // Close the form
+          htmlContent += `
+                </select>
+                <br>
+                <label for="password">Password:</label>
+                <input type="password" id="password" name="password" required>
+                <br>
+                <button type="submit">Configure</button>
+              </form>
+          `;
+        })
       }
-
       htmlContent += `
           </body>
         </html>
@@ -64,7 +64,6 @@ app.get('/', (req, res) => {
 
       res.send(htmlContent);
     });
-  });
 });
 
 // Handle form submission
