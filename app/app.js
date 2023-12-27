@@ -103,9 +103,12 @@ function getAvailableSSIDs(callback) {
     const ssids = [];
 
     // Assuming SSID is in the third column and marked with an asterisk (*) in the first column
-    lines.forEach((line) => {
+    lines.forEach((line, index) => {
       const ssid = line.trim();
-      ssids.push(ssid);
+       // Exclude the title line, empty strings, and SSIDs with only "-" characters
+       if (index > 0 && ssid && ssid !== '--') {
+        ssids.push(ssid);
+       }
     });
 
     callback(ssids);
