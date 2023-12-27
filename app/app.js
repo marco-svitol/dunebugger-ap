@@ -13,15 +13,20 @@ app.get('/', (req, res) => {
   // Check WiFi connection status
   checkWifiConnectionStatus((isConnected, ssid) => {
     // Render HTML with connection status
-    res.send(`
+    let htmlContent = `
       <!DOCTYPE html>
       <html>
         <head>
-          <title>WiFi Configuration</title>
+          <title>Dunebugger WiFi Configuration</title>
         </head>
         <body>
-          <h1>WiFi Configuration</h1>
-          <p>${isConnected ? `Connected to ${ssid}` : 'Not Connected'}</p>
+          <h1>Dunebugger WiFi Configuration</h1>
+          <p>${isConnected ? `Connected to <strong>${ssid}</strong>` : 'Not Connected'}</p>
+    `;
+
+    // Include the form only if not connected
+    if (!isConnected) {
+      htmlContent += `
           <form action="/configure" method="post">
             <label for="ssid">SSID:</label>
             <input type="text" id="ssid" name="ssid" required>
@@ -31,9 +36,15 @@ app.get('/', (req, res) => {
             <br>
             <button type="submit">Configure</button>
           </form>
+      `;
+    }
+
+    htmlContent += `
         </body>
       </html>
-    `);
+    `;
+
+    res.send(htmlContent);
   });
 });
 
