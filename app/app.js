@@ -115,6 +115,22 @@ function getAvailableSSIDs(callback) {
   });
 }
 
+// Function to set WiFi configuration
+function setWifiConfiguration(ssid, password, callback) {
+  const command = `nmcli device wifi connect "${ssid}" password "${password}"`;
+
+  exec(command, (error, stdout, stderr) => {
+    if (error || stderr) {
+      console.error(`Error setting WiFi configuration: ${error ? error.message : stderr}`);
+      callback(stderr);
+      return;
+    }
+
+    console.log(`WiFi configuration set successfully: ${stdout}`);
+    callback(null);
+  });
+}
+
 function checkWifiConnectionStatus(callback) {
   const statusCommand = "nmcli connection show --active";
 
@@ -136,6 +152,8 @@ function checkWifiConnectionStatus(callback) {
       //DEBUG
       if (connectedSSID == "Soter333"){return callback(false, null)} 
 
+      createFlagFile();
+      
       callback(true, connectedSSID);
     } else {
       callback(false, null);
