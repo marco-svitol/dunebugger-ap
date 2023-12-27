@@ -10,56 +10,59 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 // Serve HTML configuration page
 app.get('/', (req, res) => {
-  // Check WiFi connection status
-  checkWifiConnectionStatus((isConnected, ssid) => {
-    // Render HTML with connection status
-    let htmlContent = `
-      <!DOCTYPE html>
-      <html>
-        <head>
-          <title>Dunebugger WiFi Configuration</title>
-        </head>
-        <body>
-          <h1>Dunebugger WiFi Configuration</h1>
-    `;
-
-    // Include the form only if not connected
-    if (isConnected) {
-      htmlContent += `
-          <p>Connected to <strong>${ssid}</strong></p>
-      `;
-    } else {
-      // Render the form with a dropdown for available SSIDs
-      htmlContent += `
-          <p>Not Connected</p>
-          <form action="/configure" method="post">
-            <label for="ssid">Select SSID:</label>
-            <select id="ssid" name="ssid" required>
+  // Get the list of available SSIDs
+  getAvailableSSIDs((availableSSIDs) => {
+    // Check WiFi connection status
+    checkWifiConnectionStatus((isConnected, ssid) => {
+      // Render HTML with connection status
+      let htmlContent = `
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <title>Dunebugger WiFi Configuration</title>
+          </head>
+          <body>
+            <h1>Dunebugger WiFi Configuration</h1>
       `;
 
-      // Populate the dropdown with available SSIDs
-      availableSSIDs.forEach((availableSSID) => {
-        htmlContent += `<option value="${availableSSID}">${availableSSID}</option>`;
-      });
+      // Include the form only if not connected
+      if (isConnected) {
+        htmlContent += `
+            <p>Connected to <strong>${ssid}</strong></p>
+        `;
+      } else {
+        // Render the form with a dropdown for available SSIDs
+        htmlContent += `
+            <p>Not Connected</p>
+            <form action="/configure" method="post">
+              <label for="ssid">Select SSID:</label>
+              <select id="ssid" name="ssid" required>
+        `;
 
-      // Close the form
+        // Populate the dropdown with available SSIDs
+        availableSSIDs.forEach((availableSSID) => {
+          htmlContent += `<option value="${availableSSID}">${availableSSID}</option>`;
+        });
+
+        // Close the form
+        htmlContent += `
+              </select>
+              <br>
+              <label for="password">Password:</label>
+              <input type="password" id="password" name="password" required>
+              <br>
+              <button type="submit">Configure</button>
+            </form>
+        `;
+      }
+
       htmlContent += `
-            </select>
-            <br>
-            <label for="password">Password:</label>
-            <input type="password" id="password" name="password" required>
-            <br>
-            <button type="submit">Configure</button>
-          </form>
+          </body>
+        </html>
       `;
-    }
 
-    htmlContent += `
-        </body>
-      </html>
-    `;
-
-    res.send(htmlContent);
+      res.send(htmlContent);
+    });
   });
 });
 
