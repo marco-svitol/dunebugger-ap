@@ -60,7 +60,12 @@ app.post('/configure', (req, res) => {
     if (isConnected) {
       res.send(`Configuration successful. WiFi connection status: Connected to ${connectedSSID}`);
     } else {
-      res.send('Configuration successful, but WiFi connection failed.');
+      res.send(`
+        Configuration successful, but WiFi connection failed. 
+        <form action="/" method="get">
+          <button type="submit">OK</button>
+        </form>
+    `);
     }
   });
 });
