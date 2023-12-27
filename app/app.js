@@ -54,7 +54,11 @@ app.get('/', (req, res) => {
                 <br>
                 <button type="submit">Configure</button>
               </form>
+              </body>
+              </html>
           `;
+          // Send the final HTML content
+          res.send(htmlContent);
         })
       }
       htmlContent += `
