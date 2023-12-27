@@ -76,8 +76,8 @@ function setWifiConfiguration(ssid, password, callback) {
 
   exec(command, (error, stdout, stderr) => {
     if (error) {
-      console.error(`Error setting WiFi configuration: ${stderr}`);//${error.message}`);
-      callback(error.message);
+      console.error(`Error setting WiFi configuration: ${error.message}`);
+      callback(stderr);
       return;
     }
 
