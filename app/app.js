@@ -41,7 +41,8 @@ app.get('/', (req, res) => {
 
         // Populate the dropdown with available SSIDs
         availableSSIDs.forEach((availableSSID) => {
-          htmlContent += `<option value="${availableSSID}">${availableSSID}</option>`;
+          const isSelected = availableSSID === inUseSSID ? 'selected' : '';
+          htmlContent += `<option value="${availableSSID}" ${isSelected}>${availableSSID}</option>`;
         });
 
         // Close the form
@@ -89,43 +90,33 @@ app.post('/configure', (req, res) => {
   });
 });
 
-// Function to get the list of available SSIDs
 function getAvailableSSIDs(callback) {
   const listCommand = 'nmcli device wifi list';
 
   exec(listCommand, (error, stdout, stderr) => {
     if (error || stderr) {
       console.error(`Error getting available SSIDs: ${error ? error.message : stderr}`);
-      callback([]);
+      callback([], null);
       return;
     }
 
-    console.log(`getAvailableSSIDs ${stdout}`)
     const lines = stdout.split('\n');
-    const ssids = lines.slice(1).map(line => line.split(/\s+/)[0]); // Assuming SSID is the first field
+    const ssids = [];
+    let inUseSSID = null;
 
-    callback(ssids);
-  });
-}
+    // Assuming SSID is in the third column and marked with an asterisk (*) in the first column
+    lines.slice(1).forEach((line) => {
+      const columns = line.trim().split(/\s+/);
+      const ssid = columns[2];
 
-function setWifiConfiguration(ssid, password, callback) {
-  const command = `nmcli device wifi connect "${ssid}" password "${password}"`;
+      if (columns[0].includes('*')) {
+        inUseSSID = ssid;
+      }
 
-  exec(command, (error, stdout, stderr) => {
-    if (error) {
-      console.error(`Error setting WiFi configuration: ${error.message}`);
-      callback(stderr);
-      return;
-    }
+      ssids.push(ssid);
+    });
 
-    if (stderr) {
-      console.error(`Error setting WiFi configuration: ${stderr}`);
-      callback(stderr);
-      return;
-    }
-
-    console.log(`WiFi configuration set successfully: ${stdout}`);
-    callback(null);
+    callback(ssids, inUseSSID);
   });
 }
 
