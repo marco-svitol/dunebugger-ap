@@ -53,38 +53,42 @@ app.post('/configure', (req, res) => {
   const { ssid, password } = req.body;
 
   // Set WiFi configuration using Network Manager
-  setWifiConfiguration(ssid, password);
-
-  // Check WiFi connection status and display it on the web page
-  checkWifiConnectionStatus((isConnected, connectedSSID) => {
-    if (isConnected) {
-      res.send(`Configuration successful. WiFi connection status: Connected to ${connectedSSID}`);
-    } else {
-      res.send(`
-        Configuration successful, but WiFi connection failed. 
-        <form action="/" method="get">
-          <button type="submit">OK</button>
-        </form>
-    `);
-    }
+  setWifiConfiguration(ssid, password, (error) => {
+    // Check WiFi connection status and display it on the web page
+    checkWifiConnectionStatus((isConnected, connectedSSID) => {
+      if (isConnected) {
+        res.send(`Configuration successful. WiFi connection status: Connected to ${connectedSSID}`);
+      } else {
+        const errorMessage = error ? `Error: ${error}` : 'WiFi connection failed.';
+        res.send(`
+          Configuration failed. ${errorMessage}
+          <form action="/" method="get">
+            <button type="submit">OK</button>
+          </form>
+        `);
+      }
+    });
   });
 });
 
-function setWifiConfiguration(ssid, password) {
+function setWifiConfiguration(ssid, password, callback) {
   const command = `nmcli device wifi connect "${ssid}" password "${password}"`;
 
   exec(command, (error, stdout, stderr) => {
     if (error) {
       console.error(`Error setting WiFi configuration: ${error.message}`);
+      callback(error.message);
       return;
     }
 
     if (stderr) {
       console.error(`Error setting WiFi configuration: ${stderr}`);
+      callback(stderr);
       return;
     }
 
     console.log(`WiFi configuration set successfully: ${stdout}`);
+    callback(null);
   });
 }
 
