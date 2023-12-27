@@ -40,12 +40,11 @@ app.get('/', (req, res) => {
               <select id="ssid" name="ssid" required>
         `;
 
-        getAvailableSSIDs((availableSSIDs, inUseSSID) => {
+        getAvailableSSIDs((availableSSIDs) => {
           // Check WiFi connection status
           // Populate the dropdown with available SSIDs
           availableSSIDs.forEach((availableSSID) => {
-            const isSelected = availableSSID === inUseSSID ? 'selected' : '';
-            htmlContent += `<option value="${availableSSID}" ${isSelected}>${availableSSID}</option>`;
+            htmlContent += `<option value="${availableSSID}">${availableSSID}</option>`;
           });
 
           // Close the form
@@ -91,7 +90,7 @@ app.post('/configure', (req, res) => {
 });
 
 function getAvailableSSIDs(callback) {
-  const listCommand = 'nmcli device wifi list';
+  const listCommand = 'nmcli device wifi list | awk \'/^\\*/ {print $3} !/^\\*/ {print $2}\'';
 
   exec(listCommand, (error, stdout, stderr) => {
     if (error || stderr) {
@@ -101,24 +100,15 @@ function getAvailableSSIDs(callback) {
     }
 
     const lines = stdout.split('\n');
-    console.log(`getAvailableSSIDs SSIDs:\n${stdout}`)
     const ssids = [];
-    let inUseSSID = null;
 
     // Assuming SSID is in the third column and marked with an asterisk (*) in the first column
-    lines.slice(1).forEach((line) => {
-      const columns = line.trim().split(/\s+/);
-      const ssid = columns[2];
-      
-      console.log(`getAvailableSSIDs columns0:${columns[0]} columns1:${columns[1]} columns2:${columns[2]}`)
-      if (columns[0].includes('*')) {
-        inUseSSID = ssid;
-      }
-
+    lines.forEach((line) => {
+      const ssid = line.trim();
       ssids.push(ssid);
     });
 
-    callback(ssids, inUseSSID);
+    callback(ssids);
   });
 }
 
