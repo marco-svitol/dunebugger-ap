@@ -10,7 +10,31 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 // Serve HTML configuration page
 app.get('/', (req, res) => {
-  res.sendFile(__dirname + '/config.html');
+  // Check WiFi connection status
+  checkWifiConnectionStatus((isConnected, ssid) => {
+    // Render HTML with connection status
+    res.send(`
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>WiFi Configuration</title>
+        </head>
+        <body>
+          <h1>WiFi Configuration</h1>
+          <p>${isConnected ? `Connected to ${ssid}` : 'Not Connected'}</p>
+          <form action="/configure" method="post">
+            <label for="ssid">SSID:</label>
+            <input type="text" id="ssid" name="ssid" required>
+            <br>
+            <label for="password">Password:</label>
+            <input type="password" id="password" name="password" required>
+            <br>
+            <button type="submit">Configure</button>
+          </form>
+        </body>
+      </html>
+    `);
+  });
 });
 
 // Handle form submission
@@ -20,7 +44,14 @@ app.post('/configure', (req, res) => {
   // Set WiFi configuration using Network Manager
   setWifiConfiguration(ssid, password);
 
-  res.send('Configuration successful. Please reboot your device.');
+  // Check WiFi connection status and display it on the web page
+  checkWifiConnectionStatus((isConnected, connectedSSID) => {
+    if (isConnected) {
+      res.send(`Configuration successful. WiFi connection status: Connected to ${connectedSSID}`);
+    } else {
+      res.send('Configuration successful, but WiFi connection failed.');
+    }
+  });
 });
 
 function setWifiConfiguration(ssid, password) {
@@ -38,12 +69,34 @@ function setWifiConfiguration(ssid, password) {
     }
 
     console.log(`WiFi configuration set successfully: ${stdout}`);
-
-    // Create the flag file indicating WiFi configuration is completed
-    createFlagFile();
   });
 }
 
+function checkWifiConnectionStatus(callback) {
+  const statusCommand = "nmcli connection show --active";
+
+  exec(statusCommand, (error, stdout, stderr) => {
+    if (error || stderr) {
+      console.error(`Error checking WiFi connection status: ${error ? error.message : stderr}`);
+      callback(false, null);
+      return;
+    }
+
+    const lines = stdout.split('\n');
+    const isConnected = lines.some(line => line.includes('wifi') && !line.includes('loopback'));
+
+    if (isConnected) {
+      // Extract the SSID from the connected line
+      const connectedLine = lines.find(line => line.includes('wifi') && !line.includes('loopback'));
+      const connectedSSID = connectedLine.split(/\s+/)[0]; // Assuming SSID is the first field
+
+      callback(true, connectedSSID);
+    } else {
+      callback(false, null);
+    }
+  });
+}
+  
 // Start the Express server
 app.listen(port, () => {
   console.log(`Server running at http://localhost:${port}/`);
