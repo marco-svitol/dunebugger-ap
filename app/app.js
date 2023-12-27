@@ -101,6 +101,9 @@ function checkWifiConnectionStatus(callback) {
       const connectedLine = lines.find(line => line.includes('wifi') && !line.includes('loopback'));
       const connectedSSID = connectedLine.split(/\s+/)[0]; // Assuming SSID is the first field
 
+      //DEBUG
+      if (connectedSSID == "Soter333"){callback(false, null)} 
+
       callback(true, connectedSSID);
     } else {
       callback(false, null);
