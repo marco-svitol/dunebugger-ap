@@ -100,6 +100,7 @@ function getAvailableSSIDs(callback) {
       return;
     }
 
+    console.log(`getAvailableSSIDs ${stdout}`)
     const lines = stdout.split('\n');
     const ssids = lines.slice(1).map(line => line.split(/\s+/)[0]); // Assuming SSID is the first field
 
